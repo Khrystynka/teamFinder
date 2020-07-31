@@ -1,5 +1,5 @@
 from requests_oauthlib import OAuth2Session
-from flask import Flask, request, redirect, session, url_for
+from flask import Flask, request, redirect, session, url_for, render_template
 from flask.json import jsonify
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
@@ -30,6 +30,11 @@ token_url = 'https://github.com/login/oauth/access_token'
 user_login = 'Khrystynka'
 HEADERS = {'ACCEPT': 'application/vnd.github.cloak-preview'}
 author = None
+
+
+@app.route("/")
+def my_index():
+    return render_template("index.html", flask_token="Hello   world")
 
 
 @app.route("/login")
