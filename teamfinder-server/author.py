@@ -93,15 +93,14 @@ class Author:
         }
         parsed_result = get_url(
             self.AouthSession, 'https://api.github.com/search/issues', payload=payload)
-        if not parsed_result:
-            return []
-        comments_urls = list(map(lambda p: p['comments_url'], filter(
-            lambda k: k['comments'] != 0, parsed_result['items'])))
-        # print(comments_urls)
-        for url in comments_urls:
-            logins = self.get_comment_authors(url)
-            for login in logins:
-                team[login] = 1
+        if parsed_result:
+            comments_urls = list(map(lambda p: p['comments_url'], filter(
+                lambda k: k['comments'] != 0, parsed_result['items'])))
+            # print(comments_urls)
+            for url in comments_urls:
+                logins = self.get_comment_authors(url)
+                for login in logins:
+                    team[login] = 1
         return (team)
 
     def get_followers(self):

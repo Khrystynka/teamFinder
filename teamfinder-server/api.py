@@ -27,14 +27,13 @@ class User(db.Model):
 
 authorization_base_url = 'https://github.com/login/oauth/authorize'
 token_url = 'https://github.com/login/oauth/access_token'
-user_login = 'Khrystynka'
 HEADERS = {'ACCEPT': 'application/vnd.github.cloak-preview'}
 author = None
 
 
 @app.route("/")
 def my_index():
-    return render_template("index.html", flask_token="Hello   world")
+    return render_template("index.html", flask_token="Team finder token")
 
 
 @app.route("/login")
@@ -44,13 +43,13 @@ def login():
     Redirect the user/resource owner to the OAuth provider (i.e. Github)
     using an URL with a few key OAuth parameters.
     """
-    prime_user = User.query.filter_by(user=user_login).first()
+    # prime_user = User.query.filter_by(user=user_login).first()
 
-    if prime_user:
-        return 'Success.You are already logged in'
+    # if prime_user:
+    #     return 'Success.You are already logged in'
     github = OAuth2Session(app.config['CLIENT_ID'])
     authorization_url, state = github.authorization_url(
-        authorization_base_url, login=user_login)
+        authorization_base_url)
 
     # # State is used to prevent CSRF, keep this for later.
     session['oauth_state'] = state
@@ -72,12 +71,14 @@ def callback():
     token = github.fetch_token(token_url, client_secret=app.config['CLIENT_SECRET'],
                                authorization_response=request.url)
 
-    access_token = json.dumps(token)
+    # access_token = json.dumps(token)
+    session['oauth_token'] = token
+
     # print(access_token)
     # return access_token
-    user = User(user=user_login, token=access_token)
-    db.session.add(user)
-    db.session.commit()
+    # user = User(user=user_login, token=access_token)
+    # db.session.add(user)
+    # db.session.commit()
     return jsonify('Success! You are logged in')
 
 
@@ -97,14 +98,15 @@ def get_team(user):
     """
     # if 'oauth_token' not in session.keys():
     #     return 'Login first'
-    prime_user = User.query.filter_by(user=user_login).first()
-    if prime_user:
-        access_token = json.loads(prime_user.token)
-        print('token', access_token)
-    else:
+    # prime_user = User.query.filter_by(user=user_login).first()
+    # if prime_user:
+    #     access_token = json.loads(prime_user.token)
+    #     print('token', access_token)
+    if 'oauth_token' not in session.keys():
         return 'Login first'
+    print(session)
     github = OAuth2Session(
-        app.config['CLIENT_ID'], token=access_token)
+        app.config['CLIENT_ID'], token=session['oauth_token'])
     author = Author(github, user)
     if not author:
         return 'User login is not valid'
