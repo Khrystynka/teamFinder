@@ -1,8 +1,10 @@
 {
-  "name": "team-finder",
+  "name": "teamfinder-react",
   "version": "0.1.0",
   "private": true,
+  "homepage": "/static/react",
   "dependencies": {
+    "@material-ui/icons": "^4.9.1",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
@@ -12,7 +14,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && cp -r build/* ../teamfinder-server/static/react/ && cp build/index.html ../teamfinder-server/templates/",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
