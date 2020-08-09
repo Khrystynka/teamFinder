@@ -34,6 +34,30 @@ UI_url = "http://127.0.0.1:3000"
 author = None
 
 
+def combineTeams(team1, team2, team3, team4, user):
+    for login in team4:
+        if login in team3:
+            team3[login] *= 2
+        else:
+            team3[login] = 2
+    for login in team1:
+        if login in team3:
+            team3[login] *= 1.2
+        else:
+            team3[login] = 1
+    for login in team2:
+        if login in team3:
+            team3[login] *= 1.2
+        else:
+            team3[login] = 1
+    if user in team3:
+        del(team3[user])
+    team = list(map(lambda k: k[0], sorted(
+        team3.items(), key=lambda x: x[1], reverse=True)))
+
+    return (team)
+
+
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -139,10 +163,14 @@ def get_team(user):
     team_close_commits = author.get_team_by_close_commits()
     team_followers = author.get_followers()
     team_following = author.get_following()
+    team = combineTeams(team_followers, team_following,
+                        team_close_commits, team_comments, user)
     # return jsonify({'team': team})
-    resp = jsonify({'team1': team_close_commits, 'team2': team_comments,
-                    'followers': team_followers, 'following': team_following})
-    print("resp", resp)
+    # resp = jsonify({'team': team, 'comments': team_comments,
+    #                 'commits': team_close_commits})
+    resp = jsonify({'team': team})
+
+    print("resp", resp.data)
     # resp.headers['Access-Control-Allow-Origin'] = "*"
     resp.headers['Access-Control-Allow-Credentials'] = "true"
     resp.headers['Access-Control-Allow-Origin'] = "http://127.0.0.1:3000"
