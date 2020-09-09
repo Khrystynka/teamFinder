@@ -120,7 +120,8 @@ def callback():
                                authorization_response=request.url)
 
     session['oauth_token'] = token
-    return redirect(UI_url)
+    # return redirect(UI_url)
+    return redirect(url_for("home"))
 
 
 # @app.route("/profile", methods=["GET"])
