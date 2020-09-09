@@ -119,15 +119,7 @@ def callback():
     token = github.fetch_token(token_url, client_secret=app.config['CLIENT_SECRET'],
                                authorization_response=request.url)
 
-    # access_token = json.dumps(token)
     session['oauth_token'] = token
-    print(token)
-    # print(access_token)
-    # return access_token
-    # user = User(user=user_login, token=access_token)
-    # db.session.add(user)
-    # db.session.commit()
-    # return redirect(url_for('home'))
     return redirect(UI_url)
 
 
@@ -139,10 +131,27 @@ def callback():
 #     # result = github.get('https://api.github.com/users/'+search_login)
 #     print(result.headers)
 #     return jsonify(result.json())
+@app.route("/logout")
+def logout():
+    print('Cookie', request.cookies)
+    # session.pop('oauth_state')
+    # session.pop('oauth_token')
+    session.clear()
+    print('clean_session', session)
+    # return redirect(UI_url)
+    resp = jsonify({'deleted': 1})
+    resp.headers['Access-Control-Allow-Credentials'] = "true"
+    resp.headers['Access-Control-Allow-Origin'] = "http://127.0.0.1:3000"
+
+    # resp.delete_cookie
+
+    return resp
 
 
 @app.route("/get_team/<user>", methods=["GET"])
 def get_team(user):
+    print('Cookies', request.cookies)
+    print('Session', session)
     """Fetching a protected resource using an OAuth 2 token.
     """
     # if 'oauth_token' not in session.keys():
