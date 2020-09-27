@@ -15,11 +15,11 @@ def get_url(AouthSession, url, payload=None, headers=HEADERS):
     try:
         result = AouthSession.get(url, params=payload, headers=headers)
         parsed_result = json.loads(result.text)
-        print(url, result.headers['Status'],
-              result.headers['X-RateLimit-Limit'])
+        # print(url, result.headers['Status'],
+        #       result.headers['X-RateLimit-Limit'])
         result.raise_for_status()
     except requests.exceptions.RequestException as error:
-        print(error)
+        # print(error)
         parsed_result = None
     return parsed_result
 
@@ -119,22 +119,3 @@ class Author:
         team = list(map(lambda p: p['login'], parsed_result))
         # print(comments_urls)
         return (team)
-
-
-# author = Author("oktocat")
-# print(author.name)
-# print(author.login)
-# print(author.url)
-# print(author.avatar)
-# # print('team by commits',author.get_team_by_close_commits())
-# prs = author.get_comment_authors('https://api.github.com/repos/cocaine/cocaine-plugins/issues/38/comments')
-# print('team by pull requests',author.get_team_by_pullrequests())
-
-
-# team = author.get_repo_team(commit['repo_name'],commit['commit_date'])
-# print('team',team)
-
-# print("committs for user Mrugesh Mohapatra:", author.name)
-
-# lst= get_committers("freeCodeCamp/freeCodeCamp",'2020-04-30T11:37:24.000-07:00')
-# print(lst)
