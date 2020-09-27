@@ -48,8 +48,10 @@ const ListComponent = (props) => {
 
   return (
     // dense
-    <List className={classes.root} subheader={<li />}>
+    <List className={classes.root} subheader={<div />}>
       <ListSubheader>Team for {props.content[0]}</ListSubheader>
+      {/* <lh>Team for {props.content[0]}</lh> */}
+
       <Divider />
       {props.content.map((value, ind) => {
         const labelId = `label-${ind}`;
@@ -58,7 +60,7 @@ const ListComponent = (props) => {
           <ListItem
             key={ind}
             button
-            onClick={() => props.onNewSearchClick(value)}
+            onClick={() => props.onNewSearchClick(value, props.grid_key)}
           >
             <ListItemAvatar>
               <Avatar

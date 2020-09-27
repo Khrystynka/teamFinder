@@ -1,3 +1,11 @@
+React application uses teamfinder-server's API to get a list of 'teammates' and displays it in user friendly way.
+Uses [material-ui](https://material-ui.com/) styled components.
+To build the application:
+
+```
+npm build
+```
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

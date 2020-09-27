@@ -20,6 +20,7 @@ const ItemGrid = (props) => {
       <Paper elevation={3} style={{ height: 500, overflow: "auto" }}>
         <ListComponent
           content={props.content}
+          grid_key={props.grid_key}
           // search_user={props.search_user}
           onNewSearchClick={props.onNewSearchClick}
         />

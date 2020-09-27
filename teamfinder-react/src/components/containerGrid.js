@@ -7,8 +7,8 @@ const ContainerGrid = (props) => {
     return (
       <ItemGrid
         key={ind}
+        grid_key={ind}
         content={item}
-        // search_user={item[0]}
         onNewSearchClick={props.onNewSearchClick}
       />
     );
