@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from config import Config
 from author import Author
 import json
-
+import requests
 
 import os
 
@@ -27,17 +27,64 @@ class User(db.Model):
 
 authorization_base_url = 'https://github.com/login/oauth/authorize'
 token_url = 'https://github.com/login/oauth/access_token'
+check_token = 'https://api.github.com/user'
 HEADERS = {'ACCEPT': 'application/vnd.github.cloak-preview'}
+
+UI_url = "http://127.0.0.1:3000"
 author = None
 
 
+def combineTeams(team1, team2, team3, team4, user):
+    for login in team4:
+        if login in team3:
+            team3[login] *= 2
+        else:
+            team3[login] = 2
+    for login in team1:
+        if login in team3:
+            team3[login] *= 1.2
+        else:
+            team3[login] = 1
+    for login in team2:
+        if login in team3:
+            team3[login] *= 1.2
+        else:
+            team3[login] = 1
+    if user in team3:
+        del(team3[user])
+    team = list(map(lambda k: k[0], sorted(
+        team3.items(), key=lambda x: x[1], reverse=True)))
+
+    return (team)
+
+
 @app.route("/")
-def my_index():
-    return render_template("index.html", flask_token="Team finder token")
+def home():
+    return render_template("index.html")
+
+
+@app.route("/user")
+def get_current_user():
+    isAuth = None
+    auth_user = None
+    if ('oauth_token' in session.keys()):
+        try_token = requests.get(
+            check_token, headers={"Authorization": "token "+session['oauth_token']['access_token'], "Access-Control-Allow-Origin": '*'})
+        if try_token.status_code == 200:
+            isAuth = 1
+            auth_user = json.loads(try_token.text)["login"]
+            # print('try token', json.loads(try_token.text)["login"])
+    resp = jsonify({'auth_user': auth_user, 'isAuth': isAuth})
+    # resp.headers['Access-Control-Allow-Origin'] = "*"
+    resp.headers['Access-Control-Allow-Credentials'] = "true"
+    resp.headers['Access-Control-Allow-Origin'] = "http://127.0.0.1:3000"
+
+    return resp
 
 
 @app.route("/login")
 def login():
+    print('flask login')
     """Step 1: User Authorization.
 
     Redirect the user/resource owner to the OAuth provider (i.e. Github)
@@ -53,6 +100,7 @@ def login():
 
     # # State is used to prevent CSRF, keep this for later.
     session['oauth_state'] = state
+    print('auth url', authorization_url)
     return redirect(authorization_url)
 
 
@@ -71,15 +119,9 @@ def callback():
     token = github.fetch_token(token_url, client_secret=app.config['CLIENT_SECRET'],
                                authorization_response=request.url)
 
-    # access_token = json.dumps(token)
     session['oauth_token'] = token
-
-    # print(access_token)
-    # return access_token
-    # user = User(user=user_login, token=access_token)
-    # db.session.add(user)
-    # db.session.commit()
-    return jsonify('Success! You are logged in')
+    # return redirect(UI_url)
+    return redirect(url_for("home"))
 
 
 # @app.route("/profile", methods=["GET"])
@@ -90,10 +132,27 @@ def callback():
 #     # result = github.get('https://api.github.com/users/'+search_login)
 #     print(result.headers)
 #     return jsonify(result.json())
+@app.route("/logout")
+def logout():
+    print('Cookie', request.cookies)
+    # session.pop('oauth_state')
+    # session.pop('oauth_token')
+    session.clear()
+    print('clean_session', session)
+    # return redirect(UI_url)
+    resp = jsonify({'deleted': 1})
+    resp.headers['Access-Control-Allow-Credentials'] = "true"
+    resp.headers['Access-Control-Allow-Origin'] = "http://127.0.0.1:3000"
+
+    # resp.delete_cookie
+
+    return resp
 
 
 @app.route("/get_team/<user>", methods=["GET"])
 def get_team(user):
+    print('Cookies', request.cookies)
+    print('Session', session)
     """Fetching a protected resource using an OAuth 2 token.
     """
     # if 'oauth_token' not in session.keys():
@@ -114,8 +173,19 @@ def get_team(user):
     team_close_commits = author.get_team_by_close_commits()
     team_followers = author.get_followers()
     team_following = author.get_following()
+    team = combineTeams(team_followers, team_following,
+                        team_close_commits, team_comments, user)
     # return jsonify({'team': team})
-    return jsonify({'team1': team_close_commits, 'team2': team_comments, 'followers': team_followers, 'following': team_following})
+    # resp = jsonify({'team': team, 'comments': team_comments,
+    #                 'commits': team_close_commits})
+    resp = jsonify({'team': team})
+
+    print("resp", resp.data)
+    # resp.headers['Access-Control-Allow-Origin'] = "*"
+    resp.headers['Access-Control-Allow-Credentials'] = "true"
+    resp.headers['Access-Control-Allow-Origin'] = "http://127.0.0.1:3000"
+
+    return resp
 
 
 if __name__ == "__main__":
