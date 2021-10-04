@@ -1,5 +1,6 @@
 from requests_oauthlib import OAuth2Session
 from flask import Flask, request, redirect, session, url_for, render_template
+# from flask import *
 from flask.json import jsonify
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
@@ -26,7 +27,7 @@ token_url = 'https://github.com/login/oauth/access_token'
 check_token = 'https://api.github.com/user'
 HEADERS = {'ACCEPT': 'application/vnd.github.cloak-preview'}
 
-UI_url = "http://127.0.0.1:3000"
+URL = "https://teamfinder.herokuapp.com"
 author = None
 
 
@@ -71,7 +72,7 @@ def get_current_user():
             auth_user = json.loads(try_token.text)["login"]
     resp = jsonify({'auth_user': auth_user, 'isAuth': isAuth})
     resp.headers['Access-Control-Allow-Credentials'] = "true"
-    resp.headers['Access-Control-Allow-Origin'] = "http://127.0.0.1:3000"
+    resp.headers['Access-Control-Allow-Origin'] = URL
 
     return resp
 
@@ -106,7 +107,7 @@ def logout():
     print('clean_session', session)
     resp = jsonify({'deleted': 1})
     resp.headers['Access-Control-Allow-Credentials'] = "true"
-    resp.headers['Access-Control-Allow-Origin'] = "http://127.0.0.1:3000"
+    resp.headers['Access-Control-Allow-Origin'] = URL
     return resp
 
 
@@ -131,7 +132,7 @@ def get_team(user):
     resp = jsonify({'team': team})
 
     resp.headers['Access-Control-Allow-Credentials'] = "true"
-    resp.headers['Access-Control-Allow-Origin'] = "http://127.0.0.1:3000"
+    resp.headers['Access-Control-Allow-Origin'] = URL
 
     return resp
 
