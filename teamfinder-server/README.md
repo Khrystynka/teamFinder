@@ -13,7 +13,8 @@ Possible teammates are concidered GitHub users
 To run this application:
 
 ```
-sh run.sh
+https://find-github-team.herokuapp.com
+
 ```
 
 Beware that build artifacts of client application are served as static content by Flask Server. Before starting server be sure that client app is built.
