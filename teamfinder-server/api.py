@@ -7,6 +7,10 @@ from config import Config
 from author import Author
 import json
 import requests
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+
 
 import os
 
@@ -27,7 +31,7 @@ token_url = 'https://github.com/login/oauth/access_token'
 check_token = 'https://api.github.com/user'
 HEADERS = {'ACCEPT': 'application/vnd.github.cloak-preview'}
 
-URL = "https://teamfinder.herokuapp.com"
+URL = "https://find-github-team.herokuapp.com"
 author = None
 
 
@@ -79,24 +83,29 @@ def get_current_user():
 
 @app.route("/login")
 def login():
-    print('flask login')
     github = OAuth2Session(app.config['CLIENT_ID'])
     authorization_url, state = github.authorization_url(
         authorization_base_url)
-
+    # logging.debug(f"returned from GIT authorization: url: {authorization_url} and state {state}")
+    # logging.debug(f'session before: {session}')
+    
     session['oauth_state'] = state
+    # logging.debug(f'session after: {session}')
+    
     print('auth url', authorization_url)
     return redirect(authorization_url)
 
 
 @app.route("/nextpage", methods=["GET"])
 def callback():
+    
     github = OAuth2Session(
         app.config['CLIENT_ID'], state=session['oauth_state'])
     token = github.fetch_token(token_url, client_secret=app.config['CLIENT_SECRET'],
                                authorization_response=request.url)
 
     session['oauth_token'] = token
+    logging.debug(f"fetched token: {token}")
     return redirect(url_for("home"))
 
 
@@ -113,22 +122,30 @@ def logout():
 
 @app.route("/get_team/<user>", methods=["GET"])
 def get_team(user):
-    print('Cookies', request.cookies)
-    print('Session', session)
+    logging.debug(f'In get_teams: Cookies: {request.cookies}')
+    logging.debug(f'In get_t teams: session: {session}')
+
     if 'oauth_token' not in session.keys():
         return 'Login first'
-    print(session)
     github = OAuth2Session(
         app.config['CLIENT_ID'], token=session['oauth_token'])
     author = Author(github, user)
     if not author:
-        return 'User login is not valid'
+        logging.debug( 'User login is not valid')
     team_comments = author.get_team_by_pullrequests()
+    logging.debug(f'by comments: {team_comments}')
+
     team_close_commits = author.get_team_by_close_commits()
+    logging.debug(f'by close commits: {team_close_commits}')
+
     team_followers = author.get_followers()
+    logging.debug(f'by followers: {team_followers}')
+
     team_following = author.get_following()
     team = combineTeams(team_followers, team_following,
                         team_close_commits, team_comments, user)
+    logging.debug(f'all teammates: {team}')
+
     resp = jsonify({'team': team})
 
     resp.headers['Access-Control-Allow-Credentials'] = "true"
